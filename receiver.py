@@ -5,6 +5,7 @@ import websockets
 import requests
 import json
 import urllib.parse
+from blacklist_gps import blacklisted_coordinates
 
 TEAM_NAME="Red_shamrock"
 TEAM_PASSWORD="wcdsfsd"
