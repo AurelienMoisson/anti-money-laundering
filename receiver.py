@@ -53,12 +53,16 @@ def process_transactions(transactions):
         is_fraud = is_transaction_fraudulent(transaction)
 
         # Sending data back to the API to compute score
-        # send_value(transaction['id'], is_fraud)
+        send_value(transaction['id'], is_fraud)
 
     return True;
 
 def is_transaction_fraudulent(transaction):
-    return True
+    with open('blacklist_names.txt', "r") as blacklist_names_file:
+        for line in lines:
+            if transaction["firstName"] == line.strip():
+                return True
+    return False
 
 
 
