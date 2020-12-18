@@ -58,13 +58,15 @@ def process_transactions(transactions):
 
     return True;
 
-def is_transaction_fraudulent(transaction):
+def is_name_blacklisted(transaction):
     with open('blacklist_names.txt', "r") as blacklist_names_file:
         for line in lines:
             if transaction["firstName"] == line.strip():
                 return True
     return False
 
+def is_transaction_fraudulent(transaction):
+    is_name_blacklisted(transaction)
 
 
 if __name__== "__main__":
