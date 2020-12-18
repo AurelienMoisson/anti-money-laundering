@@ -59,6 +59,10 @@ def process_transactions(transactions):
     return True;
 
 def is_transaction_fraudulent(transaction):
+    with open('blacklist_names.txt', "r") as blacklist_names_file:
+        for line in lines:
+            if transaction["firstName"] == line.strip():
+                return True
     return is_from_blacklisted_gps(transaction)
 
 def is_from_blacklisted_gps(transaction):
