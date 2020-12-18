@@ -104,14 +104,23 @@ def find_location_change_schemas(transactions):
             print("\033[31mlocation_change :",group,"\033[0m")
 
 def find_amount_change_schemas(transactions):
+    constant_fields = [
+        "firstName",
+        "lastName",
+        "latitude",
+        "longitude",
+        "iban",
+        "idCard",
+    ]
     groups = group_similar_transactions(
             transactions,
-            lambda t: remove_fields(t, ["amount", "id"])
+            lambda t: extract_fields(t, constant_fields)
             )
     for group in groups:
         if len(group) >= 3:
             mark_fraudulent(group)
             print("\033[31mamount_change :",group,"\033[0m")
+            print("\033[34mamount_values :","\t".join(str(t["amount"]) for t in group))
 
 def remove_fields(transaction, fields):
     result = transaction.copy()
