@@ -48,6 +48,8 @@ async def receive_transaction():
                 print("Reconnecting")
                 websocket = await websockets.connect(uri)
 
+            process_transactions(received)
+
 
 def process_transactions(transactions):
     for transaction in transactions:
