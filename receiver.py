@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import asyncio
-import websockets
-import requests
 import json
 import urllib.parse
+import websockets
+import requests
 from blacklist_gps import blacklisted_coordinates
 from blacklist_names import blacklisted_names
 
@@ -40,12 +40,16 @@ async def receive_transaction():
     uri = API_WEBSOCKET_TRANSACTION + TEAM_NAME
     async with websockets.connect(uri) as websocket:
         while True:
+            received = None
+
             try:
                 received = json.loads(await websocket.recv())
-                process_transactions(received)
             except:
                 print("Reconnecting")
                 websocket = await websockets.connect(uri)
+            process_transactions(received)
+
+            process_transactions(received)
 
 
 def process_transactions(transactions):
@@ -71,8 +75,8 @@ def is_blacklisted_names(transaction):
 
 def is_from_blacklisted_gps(transaction):
     return {
-        "lat": transaction["lat"],
-        "lon": transaction["lon"],
+        "lat": transaction["latitude"],
+        "lon": transaction["longitude"],
     } in blacklisted_coordinates
 
 
