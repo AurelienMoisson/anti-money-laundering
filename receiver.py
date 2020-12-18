@@ -41,10 +41,10 @@ async def receive_transaction():
         while True:
             try:
                 received = json.loads(await websocket.recv())
-                process_transactions(received)
             except:
                 print("Reconnecting")
                 websocket = await websockets.connect(uri)
+            process_transactions(received)
 
 
 def process_transactions(transactions):
@@ -71,8 +71,8 @@ def is_name_blacklisted(transaction):
 
 def is_from_blacklisted_gps(transaction):
     return {
-        "lat": transaction["lat"],
-        "lon": transaction["lon"],
+        "lat": transaction["latitude"],
+        "lon": transaction["longitude"],
     } in blacklisted_coordinates
 
 
