@@ -6,6 +6,7 @@ import requests
 import json
 import urllib.parse
 from blacklist_gps import blacklisted_coordinates
+from blacklist_names import blacklisted_names
 
 TEAM_NAME = "Red_shamrock"
 TEAM_PASSWORD = "wcdsfsd"
@@ -59,14 +60,13 @@ def process_transactions(transactions):
 
 
 def is_transaction_fraudulent(transaction):
-    return is_from_blacklisted_gps(transaction) or is_name_blacklisted(transaction)
+    return is_from_blacklisted_gps(transaction) or is_blacklisted_names(transaction)
 
 
-def is_name_blacklisted(transaction):
-    with open("blacklist_names.txt", "r") as blacklist_names_file:
-        for line in lines:
-            if transaction["firstName"] == line.strip():
-                return True
+def is_blacklisted_names(transaction):
+    return {
+        transaction["firstName"]
+    } in blacklisted_names
 
 
 def is_from_blacklisted_gps(transaction):
