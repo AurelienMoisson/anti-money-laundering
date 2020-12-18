@@ -49,7 +49,7 @@ async def receive_transaction():
             try:
                 received = json.loads(await websocket.recv())
             except:
-                log(LOG.INFO, "Reconnecting")
+                log_color(LOG.INFO, "cyan", "Reconnecting")
                 websocket = await websockets.connect(uri)
                 continue
 
