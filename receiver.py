@@ -14,7 +14,7 @@ TEAM_PASSWORD="wcdsfsd"
 API_HOST = "aml.sipios.com"
 API_PORT = "8080"
 API_ENDPOINT_SCORE = "/transaction-validation"
-API_WEBSOCKET_TRANSACTION = "ws://" + API_HOST + ":" + API_PORT + "/transaction-stream/username/"
+API_WEBSOCKET_TRANSACTION = "ws://" + API_HOST + ":" + API_PORT + "/transaction-stream/username/" + TEAM_NAME
 
 def send_value(transaction_id, is_fraudulent):
     url = "http://" + API_HOST + ":" + API_PORT + API_ENDPOINT_SCORE
@@ -50,8 +50,8 @@ async def receive_transaction():
 
 def process_transactions(transactions):
     for transaction in transactions:
-        print(transaction)
         is_fraud = is_transaction_fraudulent(transaction)
+        print(is_fraud, "\t", transaction)
 
         # Sending data back to the API to compute score
         send_value(transaction['id'], is_fraud)
@@ -59,8 +59,10 @@ def process_transactions(transactions):
     return True;
 
 def is_transaction_fraudulent(transaction):
-    return True
+    return is_from_blacklisted_gps(transaction)
 
+def is_from_blacklisted_gps(transaction):
+    return {"lat": transaction["lat"], "lon":transaction["lon"]} in blacklisted_coordinates
 
 
 if __name__== "__main__":
