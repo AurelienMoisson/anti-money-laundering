@@ -13,7 +13,7 @@ TEAM_PASSWORD="wcdsfsd"
 API_HOST = "aml.sipios.com"
 API_PORT = "8080"
 API_ENDPOINT_SCORE = "/transaction-validation"
-API_WEBSOCKET_TRANSACTION = "ws://" + API_HOST + ":" + API_PORT + "/transaction-stream/username/{TEAM_NAME}"
+API_WEBSOCKET_TRANSACTION = "ws://" + API_HOST + ":" + API_PORT + "/transaction-stream/username/"
 
 def send_value(transaction_id, is_fraudulent):
     url = "http://" + API_HOST + ":" + API_PORT + API_ENDPOINT_SCORE
