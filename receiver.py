@@ -39,12 +39,15 @@ async def receive_transaction():
     uri = API_WEBSOCKET_TRANSACTION + TEAM_NAME
     async with websockets.connect(uri) as websocket:
         while True:
+            received = None
+
             try:
                 received = json.loads(await websocket.recv())
-                process_transactions(received)
             except:
                 print("Reconnecting")
                 websocket = await websockets.connect(uri)
+
+            process_transactions(received)
 
 
 def process_transactions(transactions):
