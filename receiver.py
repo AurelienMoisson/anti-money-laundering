@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import asyncio
-import websockets
-import requests
 import json
 import urllib.parse
+import websockets
+import requests
 from blacklist_gps import blacklisted_coordinates
 
 TEAM_NAME = "Red_shamrock"
