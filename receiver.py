@@ -55,6 +55,7 @@ async def receive_transaction():
 
 def process_transactions(transactions):
     find_amount_change_schemas(transactions)
+    find_location_change_schemas(transactions)
     for transaction in transactions:
         is_fraud = is_transaction_fraudulent(transaction)
         print(is_fraud, "\t", transaction)
@@ -70,7 +71,7 @@ def process_transactions(transactions):
 
 
 def is_transaction_fraudulent(transaction):
-    return is_from_blacklisted_gps(transaction) or is_blacklisted_names(transaction)
+    return transaction.get("fraudulent", False) or is_from_blacklisted_gps(transaction) or is_blacklisted_names(transaction)
 
 
 def is_blacklisted_names(transaction):
@@ -85,34 +86,56 @@ def is_from_blacklisted_gps(transaction):
         "lon": transaction["longitude"],
     } in blacklisted_coordinates
 
+def find_location_change_schemas(transactions):
+    constant_fields = [
+        "firstName",
+        "lastName",
+        "iban",
+        "amount",
+        "idCard",
+    ]
+    groups = group_similar_transactions(
+            transactions,
+            lambda t: extract_fields(t, constant_fields)
+            )
+    for group in groups:
+        if len(group) >= 3:
+            mark_fraudulent(group)
+            print("\033[31mlocation_change :",group,"\033[0m")
+
 def find_amount_change_schemas(transactions):
     groups = group_similar_transactions(
             transactions,
-            remove_amount
+            lambda t: remove_fields(t, ["amount", "id"])
             )
-    fraudulent_transactions = []
     for group in groups:
         if len(group) >= 3:
-            fraudulent_transactions += group
-    print("\033[31m",fraudulent_transactions,"\033[0m")
-    return fraudulent_transactions
+            mark_fraudulent(group)
+            print("\033[31mamount_change :",group,"\033[0m")
 
-def remove_amount(transaction):
+def remove_fields(transaction, fields):
     result = transaction.copy()
-    result.pop("amount")
-    result.pop("id")
+    for field in fields:
+        result.pop(field)
     return str(result)
+
+def extract_fields(transaction, fields):
+    return str({field:transaction[field] for field in fields})
 
 def group_similar_transactions(batch, categorizer):
     categories = {}
     for transaction in batch:
         category = categorizer(transaction)
+        print("\033[32m", category, "\033[0m")
         if category in categories:
             categories[category].append(transaction)
         else:
             categories[category] = [transaction]
     return categories.values()
 
+def mark_fraudulent(transactions):
+    for transaction in transactions:
+        transaction["fraudulent"] = True
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(receive_transaction())
