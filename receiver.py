@@ -100,6 +100,7 @@ def find_amount_change_schemas(transactions):
 def remove_amount(transaction):
     result = transaction.copy()
     result.pop("amount")
+    result.pop("id")
     return str(result)
 
 def group_similar_transactions(batch, categorizer):
