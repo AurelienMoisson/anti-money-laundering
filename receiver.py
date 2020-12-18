@@ -5,6 +5,7 @@ import json
 import urllib.parse
 import websockets
 import requests
+import settings
 from blacklist_gps import blacklisted_coordinates
 from blacklist_names import blacklisted_names
 
@@ -53,13 +54,17 @@ async def receive_transaction():
 
 
 def process_transactions(transactions):
+    find_amount_change_schemas(transactions)
     for transaction in transactions:
         is_fraud = is_transaction_fraudulent(transaction)
         print(is_fraud, "\t", transaction)
 
         # Sending data back to the API to compute score
         if is_fraud:
-            send_value(transaction["id"], is_fraud)
+            if settings.deploy:
+                send_value(transaction["id"], is_fraud)
+            else:
+                print("\033[33mwould have sent :\033[0m", transaction["id"], is_fraud)
 
     return True
 
@@ -79,6 +84,33 @@ def is_from_blacklisted_gps(transaction):
         "lat": transaction["latitude"],
         "lon": transaction["longitude"],
     } in blacklisted_coordinates
+
+def find_amount_change_schemas(transactions):
+    groups = group_similar_transactions(
+            transactions,
+            remove_amount
+            )
+    fraudulent_transactions = []
+    for group in groups:
+        if len(group) >= 3:
+            fraudulent_transactions += group
+    print("\033[31m",fraudulent_transactions,"\033[0m")
+    return fraudulent_transactions
+
+def remove_amount(transaction):
+    result = transaction.copy()
+    result.pop("amount")
+    return str(result)
+
+def group_similar_transactions(batch, categorizer):
+    categories = {}
+    for transaction in batch:
+        category = categorizer(transaction)
+        if category in categories:
+            categories[category].append(transaction)
+        else:
+            categories[category] = [transaction]
+    return categories.values()
 
 
 if __name__ == "__main__":
