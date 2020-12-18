@@ -6,8 +6,10 @@ import urllib.parse
 import websockets
 import requests
 import settings
+from settings import LOG
 from blacklist_gps import blacklisted_coordinates
 from blacklist_names import blacklisted_names
+from logger import log, log_color
 
 TEAM_NAME = "Red_shamrock"
 TEAM_PASSWORD = "wcdsfsd"
@@ -22,6 +24,7 @@ API_WEBSOCKET_TRANSACTION = (
 
 
 def send_value(transaction_id, is_fraudulent):
+    log_color(LOG.INFO, "yellow", "sending:", transaction_id, is_fraudulent)
     url = "http://" + API_HOST + ":" + API_PORT + API_ENDPOINT_SCORE
     params = {"username": TEAM_NAME, "password": TEAM_PASSWORD}
     queryParams = urllib.parse.urlencode(params)
@@ -46,7 +49,7 @@ async def receive_transaction():
             try:
                 received = json.loads(await websocket.recv())
             except:
-                print("Reconnecting")
+                log(LOG.INFO, "Reconnecting")
                 websocket = await websockets.connect(uri)
                 continue
 
@@ -58,14 +61,14 @@ def process_transactions(transactions):
     find_location_change_schemas(transactions)
     for transaction in transactions:
         is_fraud = is_transaction_fraudulent(transaction)
-        print(is_fraud, "\t", transaction)
+        log(LOG.INFO, is_fraud, "\t", transaction)
 
         # Sending data back to the API to compute score
         if is_fraud:
             if settings.deploy:
                 send_value(transaction["id"], is_fraud)
             else:
-                print("\033[33mwould have sent :\033[0m", transaction["id"], is_fraud)
+                log_color(LOG.INFO, "yellow","would have sent :", transaction["id"], is_fraud)
 
     return True
 
@@ -101,7 +104,7 @@ def find_location_change_schemas(transactions):
     for group in groups:
         if len(group) >= 3:
             mark_fraudulent(group)
-            print("\033[31mlocation_change :",group,"\033[0m")
+            log_color(LOG.DEBUG, "red", "location_change:", group)
 
 def find_amount_change_schemas(transactions):
     constant_fields = [
@@ -119,8 +122,8 @@ def find_amount_change_schemas(transactions):
     for group in groups:
         if len(group) >= 3:
             mark_fraudulent(group)
-            print("\033[31mamount_change :",group,"\033[0m")
-            print("\033[34mamount_values :","\t".join(str(t["amount"]) for t in group))
+            log_color(LOG.DEBUG, "red", "amount_change :", group)
+            log_color(LOG.DEBUG, "blue", "amount_values :","\t".join(str(t["amount"]) for t in group))
 
 def remove_fields(transaction, fields):
     result = transaction.copy()
@@ -135,7 +138,6 @@ def group_similar_transactions(batch, categorizer):
     categories = {}
     for transaction in batch:
         category = categorizer(transaction)
-        print("\033[32m", category, "\033[0m")
         if category in categories:
             categories[category].append(transaction)
         else:
