@@ -47,7 +47,6 @@ async def receive_transaction():
             except:
                 print("Reconnecting")
                 websocket = await websockets.connect(uri)
-            process_transactions(received)
 
 
 def process_transactions(transactions):
