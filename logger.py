@@ -15,4 +15,5 @@ def log_color(level, color, *arg):
             "cyan":"\033[36m",
             "white":"\033[37m"
             }
-    log(level, colors[color], *arg, "\033[0m")
+    print(colors[color], end="")
+    log(level, *arg, "\033[0m")
