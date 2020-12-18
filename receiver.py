@@ -58,6 +58,10 @@ def process_transactions(transactions):
 
     return True;
 
+def is_transaction_fraudulent(transaction):
+    return is_from_blacklisted_gps(transaction) or \
+           is_name_blacklisted(transaction)
+
 def is_name_blacklisted(transaction):
     with open('blacklist_names.txt', "r") as blacklist_names_file:
         for line in lines:
@@ -66,10 +70,6 @@ def is_name_blacklisted(transaction):
 
 def is_from_blacklisted_gps(transaction):
     return {"lat": transaction["lat"], "lon":transaction["lon"]} in blacklisted_coordinates
-
-def is_transaction_fraudulent(transaction):
-    return is_from_blacklisted_gps(transaction) ||
-           is_name_blacklisted(transaction)
 
 
 if __name__== "__main__":
