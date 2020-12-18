@@ -49,8 +49,6 @@ async def receive_transaction():
                 websocket = await websockets.connect(uri)
             process_transactions(received)
 
-            process_transactions(received)
-
 
 def process_transactions(transactions):
     for transaction in transactions:
