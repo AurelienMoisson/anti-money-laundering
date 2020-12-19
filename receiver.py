@@ -49,7 +49,7 @@ async def receive_transaction():
             try:
                 received = json.loads(await websocket.recv())
             except:
-                log_color(LOG.INFO, "cyan", "Reconnecting")
+                log_color(LOG.WARNING, "cyan", "Reconnecting")
                 websocket = await websockets.connect(uri)
                 continue
 
@@ -59,16 +59,20 @@ async def receive_transaction():
 def process_transactions(transactions):
     find_amount_change_schemas(transactions)
     find_location_change_schemas(transactions)
+    number_sent = 0
     for transaction in transactions:
         is_fraud = is_transaction_fraudulent(transaction)
-        log(LOG.INFO, is_fraud, "\t", transaction)
+        log(LOG.DEBUG, is_fraud, "\t", transaction)
 
         # Sending data back to the API to compute score
         if is_fraud:
+            number_sent += 1
             if settings.deploy:
                 send_value(transaction["id"], is_fraud)
             else:
                 log_color(LOG.INFO, "yellow","would have sent :", transaction["id"], is_fraud)
+    if settings.log_level < LOG.DEBUG:
+        log(LOG.INFO, "sent " + str(number_sent) + " transaction results")
 
     return True
 
@@ -154,6 +158,8 @@ if __name__ == "__main__":
             asyncio.get_event_loop().run_until_complete(receive_transaction())
         except:
             if deploy:
+                log_color(LOG.WARNING, "red", "FATAL ERROR")
+                log_color(LOG.WARNING, "yellow", "restarting")
                 continue
             else:
                 raise
