@@ -149,4 +149,11 @@ def mark_fraudulent(transactions):
         transaction["fraudulent"] = True
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(receive_transaction())
+    while True:
+        try:
+            asyncio.get_event_loop().run_until_complete(receive_transaction())
+        except:
+            if deploy:
+                continue
+            else:
+                raise
