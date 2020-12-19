@@ -157,7 +157,7 @@ if __name__ == "__main__":
         try:
             asyncio.get_event_loop().run_until_complete(receive_transaction())
         except:
-            if deploy:
+            if settings.deploy:
                 log_color(LOG.WARNING, "red", "FATAL ERROR")
                 log_color(LOG.WARNING, "yellow", "restarting")
                 continue
