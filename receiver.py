@@ -72,7 +72,7 @@ def process_transactions(transactions):
             else:
                 log_color(LOG.INFO, "yellow","would have sent :", transaction["id"], is_fraud)
     if settings.log_level < LOG.DEBUG:
-        log(LOG.INFO, "sent " + str(number_sent) + " transaction results")
+        log(LOG.INFO, "sent " + str(number_sent) + "/" + str(len(transactions)) + " transaction results")
 
     return True
 
@@ -155,7 +155,10 @@ def mark_fraudulent(transactions):
 if __name__ == "__main__":
     while True:
         try:
-            asyncio.get_event_loop().run_until_complete(receive_transaction())
+            try:
+                asyncio.get_event_loop().run_until_complete(receive_transaction())
+            except KeyboardInterrupt:
+                break
         except:
             if settings.deploy:
                 log_color(LOG.WARNING, "red", "FATAL ERROR")
